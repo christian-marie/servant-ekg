@@ -1,23 +1,23 @@
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE PolyKinds #-}
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DataKinds            #-}
+{-# LANGUAGE DeriveGeneric        #-}
 {-# LANGUAGE OverlappingInstances #-}
+{-# LANGUAGE OverloadedStrings    #-}
+{-# LANGUAGE PolyKinds            #-}
+{-# LANGUAGE TypeFamilies         #-}
+{-# LANGUAGE TypeOperators        #-}
 
-import Control.Concurrent
-import Data.Aeson
-import Data.Monoid
-import Data.Proxy
-import Data.Text
-import GHC.Generics
-import Network.Wai
-import Network.Wai.Handler.Warp
-import System.Metrics
-import Servant
+import           Control.Concurrent
+import           Data.Aeson
+import           Data.Monoid
+import           Data.Proxy
+import           Data.Text
+import           GHC.Generics
+import           Network.Wai
+import           Network.Wai.Handler.Warp
+import           Servant
+import           System.Metrics
 
-import Servant.Ekg
+import           Servant.Ekg
 
 -- * Example
 
@@ -56,7 +56,7 @@ server = helloH :<|> postGreetH :<|> deleteGreetH
         helloH name (Just False) = return . Greet $ "Hello, " <> name
         helloH name (Just True) = return . Greet . toUpper $ "Hello, " <> name
 
-        postGreetH greet = return greet
+        postGreetH = return
 
         deleteGreetH _ = return ()
 
