@@ -1,0 +1,24 @@
+name:                ekg-servant
+version:             0.1.0.0
+synopsis:            Helpers for using ekg with servant
+description:         Helpers for using ekg with servant
+license:             BSD3
+license-file:        LICENSE
+author:              Anchor Engineering <engineering@lists.anchor.net.au>
+maintainer:          Anchor Engineering <engineering@lists.anchor.net.au>
+category:            System
+build-type:          Simple
+cabal-version:       >=1.10
+
+source-repository HEAD
+  type: git
+  location: https://github.com/anchor/ekg-servant.git
+
+library
+  exposed-modules:     Servant.Ekg
+  build-depends:       base >=4.7 && <4.9
+                     , ekg-core
+                     , http-types
+                     , time
+                     , wai
+  default-language:    Haskell2010
