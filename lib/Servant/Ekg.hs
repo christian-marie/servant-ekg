@@ -10,6 +10,7 @@ module Servant.Ekg where
 
 import           Control.Concurrent.MVar
 import           Control.Exception
+import           Control.Monad
 import qualified Data.HashMap.Strict         as H
 import           Data.Monoid
 import           Data.Proxy
@@ -98,7 +99,7 @@ class HasEndpoint a where
 
 instance (HasEndpoint (a :: *), HasEndpoint (b :: *)) => HasEndpoint (a :<|> b) where
     getEndpoint _ req =
-        getEndpoint (Proxy :: Proxy a) req <>
+        getEndpoint (Proxy :: Proxy a) req `mplus`
         getEndpoint (Proxy :: Proxy b) req
 
 instance (KnownSymbol (path :: Symbol), HasEndpoint (sub :: *)) => HasEndpoint (path :> sub) where
