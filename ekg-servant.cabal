@@ -17,8 +17,12 @@ source-repository HEAD
 library
   exposed-modules:     Servant.Ekg
   build-depends:       base >=4.7 && <4.9
+                     , bytestring
                      , ekg-core
+                     , servant >=0.2 && <0.3
                      , http-types
+                     , text
                      , time
+                     , unordered-containers
                      , wai
   default-language:    Haskell2010
