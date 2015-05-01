@@ -18,7 +18,7 @@ import qualified Data.Text                   as T
 import qualified Data.Text.Encoding          as T
 import           Data.Time.Clock
 import           GHC.TypeLits
-import           Network.HTTP.Types
+import           Network.HTTP.Types          (Method, Status (..))
 import           Network.Wai
 import           Servant.API
 import           System.Metrics
@@ -53,7 +53,7 @@ responseTimeDistribution dist application request respond =
     stop t1 = do
         t2 <- getCurrentTime
         let dt = diffUTCTime t2 t1
-        Distribution.add dist $ fromRational $ toRational dt
+        Distribution.add dist $ fromRational $ (*1000) $ toRational dt
 
 data Meters = Meters
     { metersInflight :: Gauge.Gauge
@@ -82,7 +82,7 @@ monitorEndpoints proxy store meters application request respond = do
             metersC4XX <- createCounter (prefix <> "responses.4XX") store
             metersC5XX <- createCounter (prefix <> "responses.5XX") store
             metersCXXX <- createCounter (prefix <> "responses.XXX") store
-            metersTime <- createDistribution (prefix <> "time") store
+            metersTime <- createDistribution (prefix <> "time_ms") store
             let m = Meters{..}
             return (H.insert path m ms, m)
         Just m -> return (ms,m)
@@ -118,7 +118,16 @@ instance (KnownSymbol (capture :: Symbol), HasEndpoint (sub :: *)) => HasEndpoin
                 return (p:end, method)
             _ -> Nothing
 
-instance HasEndpoint (sub :: *) => HasEndpoint ((a :: *) :> sub) where
+instance HasEndpoint (sub :: *) => HasEndpoint (Header h a :> sub) where
+    getEndpoint _ = getEndpoint (Proxy :: Proxy sub)
+
+instance HasEndpoint (sub :: *) => HasEndpoint (QueryParam (h :: Symbol) a :> sub) where
+    getEndpoint _ = getEndpoint (Proxy :: Proxy sub)
+
+instance HasEndpoint (sub :: *) => HasEndpoint (QueryParams (h :: Symbol) a :> sub) where
+    getEndpoint _ = getEndpoint (Proxy :: Proxy sub)
+
+instance HasEndpoint (sub :: *) => HasEndpoint (ReqBody a :> sub) where
     getEndpoint _ = getEndpoint (Proxy :: Proxy sub)
 
 instance HasEndpoint (Get a) where
