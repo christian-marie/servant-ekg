@@ -1,4 +1,4 @@
-name:                ekg-servant
+name:                servant-ekg
 version:             0.1.0.0
 synopsis:            Helpers for using ekg with servant
 description:         Helpers for using ekg with servant
@@ -12,7 +12,7 @@ cabal-version:       >=1.10
 
 source-repository HEAD
   type: git
-  location: https://github.com/anchor/ekg-servant.git
+  location: https://github.com/anchor/servant-ekg.git
 
 library
   exposed-modules:     Servant.Ekg
@@ -37,7 +37,7 @@ test-suite spec
                     , aeson
                     , ekg
                     , ekg-core
-                    , ekg-servant
+                    , servant-ekg
                     , servant-server
                     , text
                     , wai
