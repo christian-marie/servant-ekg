@@ -128,25 +128,25 @@ instance HasEndpoint (sub :: *) => HasEndpoint (QueryParam (h :: Symbol) a :> su
 instance HasEndpoint (sub :: *) => HasEndpoint (QueryParams (h :: Symbol) a :> sub) where
     getEndpoint _ = getEndpoint (Proxy :: Proxy sub)
 
-instance HasEndpoint (sub :: *) => HasEndpoint (ReqBody a :> sub) where
+instance HasEndpoint (sub :: *) => HasEndpoint (ReqBody a cts :> sub) where
     getEndpoint _ = getEndpoint (Proxy :: Proxy sub)
 
-instance HasEndpoint (Get a) where
+instance HasEndpoint (Get a cts) where
     getEndpoint _ req = case pathInfo req of
         [] | requestMethod req == "GET" -> Just ([],"GET")
         _ -> Nothing
 
-instance HasEndpoint (Put a) where
+instance HasEndpoint (Put a cts) where
     getEndpoint _ req = case pathInfo req of
         [] | requestMethod req == "PUT" -> Just ([],"PUT")
         _ -> Nothing
 
-instance HasEndpoint (Post a) where
+instance HasEndpoint (Post a cts) where
     getEndpoint _ req = case pathInfo req of
         [] | requestMethod req == "POST" -> Just ([],"POST")
         _ -> Nothing
 
-instance HasEndpoint (Delete) where
+instance HasEndpoint (Delete a cts) where
     getEndpoint _ req = case pathInfo req of
         [] | requestMethod req == "DELETE" -> Just ([],"DELETE")
         _ -> Nothing
