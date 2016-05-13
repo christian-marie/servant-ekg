@@ -6,18 +6,45 @@
 {-# LANGUAGE TypeFamilies         #-}
 {-# LANGUAGE TypeOperators        #-}
 
+module Servant.EkgSpec (spec) where
+
 import           Control.Concurrent
+import           Control.Monad.Trans.Except
 import           Data.Aeson
 import           Data.Monoid
 import           Data.Proxy
+import qualified Data.HashMap.Strict as H
 import           Data.Text
 import           GHC.Generics
+import           Network.HTTP.Client (defaultManagerSettings, newManager)
 import           Network.Wai
 import           Network.Wai.Handler.Warp
 import           Servant
+import           Servant.Client
 import           System.Metrics
+import qualified System.Metrics.Counter as Counter
+import           Test.Hspec
 
 import           Servant.Ekg
+
+
+-- * Spec
+
+spec :: Spec
+spec = describe "servant-ekg" $ do
+
+  let getEp :<|> postEp :<|> deleteEp = client testApi
+
+  it "collects GET data" $ do
+    withApp $ \port mvar -> do
+      mgr <- newManager defaultManagerSettings
+      result <- runExceptT $ getEp "name" Nothing mgr (BaseUrl Http "localhost" port "")
+      m <- readMVar mvar
+      print $ H.keys m
+      case H.lookup "hello.:name.GET" m of
+        Nothing -> fail "Expected some value"
+        Just v  -> Counter.read (metersC2XX v) `shouldReturn` 1
+
 
 -- * Example
 
@@ -65,10 +92,8 @@ server = helloH :<|> postGreetH :<|> deleteGreetH
 test :: Application
 test = serve testApi server
 
--- Put this all to work!
-main :: IO ()
-main = do
-    ekg <- newStore
-    ms <- newMVar mempty
-    _ <- forkIO $ run 8001 $ monitorEndpoints testApi ekg ms test
-    return ()
+withApp :: (Port -> MVar (H.HashMap Text Meters) -> IO a) -> IO a
+withApp a = do
+  ekg <- newStore
+  ms <- newMVar mempty
+  withApplication (return $ monitorEndpoints testApi ekg ms test) $ \p -> a p ms
