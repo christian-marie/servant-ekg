@@ -21,6 +21,7 @@ import           Network.Wai
 import           Network.Wai.Handler.Warp
 import           Servant
 import           Servant.Client
+import           Servant.API.Internal.Test.ComprehensiveAPI (comprehensiveAPI)
 import           System.Metrics
 import qualified System.Metrics.Counter as Counter
 import           Test.Hspec
@@ -33,17 +34,20 @@ import           Servant.Ekg
 spec :: Spec
 spec = describe "servant-ekg" $ do
 
-  let getEp :<|> postEp :<|> deleteEp = client testApi
+  let getEp :<|> _postEp :<|> _deleteEp = client testApi
 
-  it "collects GET data" $ do
+  it "collects number of request" $ do
     withApp $ \port mvar -> do
       mgr <- newManager defaultManagerSettings
-      result <- runExceptT $ getEp "name" Nothing mgr (BaseUrl Http "localhost" port "")
+      _result <- runExceptT $ getEp "name" Nothing mgr (BaseUrl Http "localhost" port "")
       m <- readMVar mvar
-      print $ H.keys m
       case H.lookup "hello.:name.GET" m of
         Nothing -> fail "Expected some value"
         Just v  -> Counter.read (metersC2XX v) `shouldReturn` 1
+
+  it "is comprehensive" $ do
+    let _typeLevelTest = monitorEndpoints comprehensiveAPI undefined undefined undefined
+    True `shouldBe` True
 
 
 -- * Example

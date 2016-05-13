@@ -131,7 +131,25 @@ instance HasEndpoint (sub :: *) => HasEndpoint (QueryParam (h :: Symbol) a :> su
 instance HasEndpoint (sub :: *) => HasEndpoint (QueryParams (h :: Symbol) a :> sub) where
     getEndpoint _ = getEndpoint (Proxy :: Proxy sub)
 
+instance HasEndpoint (sub :: *) => HasEndpoint (QueryFlag h :> sub) where
+    getEndpoint _ = getEndpoint (Proxy :: Proxy sub)
+
 instance HasEndpoint (sub :: *) => HasEndpoint (ReqBody cts a :> sub) where
+    getEndpoint _ = getEndpoint (Proxy :: Proxy sub)
+
+instance HasEndpoint (sub :: *) => HasEndpoint (RemoteHost :> sub) where
+    getEndpoint _ = getEndpoint (Proxy :: Proxy sub)
+
+instance HasEndpoint (sub :: *) => HasEndpoint (IsSecure :> sub) where
+    getEndpoint _ = getEndpoint (Proxy :: Proxy sub)
+
+instance HasEndpoint (sub :: *) => HasEndpoint (HttpVersion :> sub) where
+    getEndpoint _ = getEndpoint (Proxy :: Proxy sub)
+
+instance HasEndpoint (sub :: *) => HasEndpoint (Vault :> sub) where
+    getEndpoint _ = getEndpoint (Proxy :: Proxy sub)
+
+instance HasEndpoint (sub :: *) => HasEndpoint (WithNamedContext x y sub) where
     getEndpoint _ = getEndpoint (Proxy :: Proxy sub)
 
 instance ReflectMethod method => HasEndpoint (Verb method status cts a) where
