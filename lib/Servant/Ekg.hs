@@ -103,7 +103,8 @@ instance (HasEndpoint (a :: *), HasEndpoint (b :: *)) => HasEndpoint (a :<|> b) 
         getEndpoint (Proxy :: Proxy a) req `mplus`
         getEndpoint (Proxy :: Proxy b) req
 
-instance (KnownSymbol (path :: Symbol), HasEndpoint (sub :: *)) => HasEndpoint (path :> sub) where
+instance (KnownSymbol (path :: Symbol), HasEndpoint (sub :: *))
+    => HasEndpoint (path :> sub) where
     getEndpoint _ req =
         case pathInfo req of
             p:ps | p == T.pack (symbolVal (Proxy :: Proxy path)) -> do
@@ -111,7 +112,8 @@ instance (KnownSymbol (path :: Symbol), HasEndpoint (sub :: *)) => HasEndpoint (
                 return (p:end, method)
             _ -> Nothing
 
-instance (KnownSymbol (capture :: Symbol), HasEndpoint (sub :: *)) => HasEndpoint (Capture capture a :> sub) where
+instance (KnownSymbol (capture :: Symbol), HasEndpoint (sub :: *))
+    => HasEndpoint (Capture capture a :> sub) where
     getEndpoint _ req =
         case pathInfo req of
             _:ps -> do
