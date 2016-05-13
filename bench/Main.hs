@@ -32,7 +32,7 @@ servantEkgServer = do
 
 benchApp :: IO Application -> IO ()
 benchApp app = withApplication app $ \port ->
-  callCommand $ "wrk -c 2 -d 10s -s bench/wrk.lua -t 2 'http://localhost:" ++ show port ++ "'"
+  callCommand $ "wrk -c 30 -d 20s --latency -s bench/wrk.lua -t 2 'http://localhost:" ++ show port ++ "'"
 
 main :: IO ()
 main = do
