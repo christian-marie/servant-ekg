@@ -6,6 +6,7 @@
 {-# LANGUAGE RecordWildCards     #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators       #-}
+{-# LANGUAGE PolyKinds           #-}
 module Servant.Ekg where
 
 import           Control.Concurrent.MVar
@@ -128,28 +129,14 @@ instance HasEndpoint (sub :: *) => HasEndpoint (QueryParam (h :: Symbol) a :> su
 instance HasEndpoint (sub :: *) => HasEndpoint (QueryParams (h :: Symbol) a :> sub) where
     getEndpoint _ = getEndpoint (Proxy :: Proxy sub)
 
-instance HasEndpoint (sub :: *) => HasEndpoint (ReqBody a :> sub) where
+instance HasEndpoint (sub :: *) => HasEndpoint (ReqBody cts a :> sub) where
     getEndpoint _ = getEndpoint (Proxy :: Proxy sub)
 
-instance HasEndpoint (Get a) where
+instance ReflectMethod method => HasEndpoint (Verb method status cts a) where
     getEndpoint _ req = case pathInfo req of
-        [] | requestMethod req == "GET" -> Just ([],"GET")
+        [] | requestMethod req == method -> Just ([], method)
         _ -> Nothing
-
-instance HasEndpoint (Put a) where
-    getEndpoint _ req = case pathInfo req of
-        [] | requestMethod req == "PUT" -> Just ([],"PUT")
-        _ -> Nothing
-
-instance HasEndpoint (Post a) where
-    getEndpoint _ req = case pathInfo req of
-        [] | requestMethod req == "POST" -> Just ([],"POST")
-        _ -> Nothing
-
-instance HasEndpoint (Delete) where
-    getEndpoint _ req = case pathInfo req of
-        [] | requestMethod req == "DELETE" -> Just ([],"DELETE")
-        _ -> Nothing
+      where method = reflectMethod (Proxy :: Proxy method)
 
 instance HasEndpoint (Raw) where
     getEndpoint _ _ = Just ([],"RAW")
