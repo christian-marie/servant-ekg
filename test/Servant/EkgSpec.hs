@@ -1,6 +1,6 @@
+{-# LANGUAGE CPP                  #-}
 {-# LANGUAGE DataKinds            #-}
 {-# LANGUAGE DeriveGeneric        #-}
-{-# LANGUAGE OverlappingInstances #-}
 {-# LANGUAGE OverloadedStrings    #-}
 {-# LANGUAGE PolyKinds            #-}
 {-# LANGUAGE TypeFamilies         #-}
@@ -9,7 +9,9 @@
 module Servant.EkgSpec (spec) where
 
 import           Control.Concurrent
+#if !MIN_VERSION_servant(0,9,0)
 import           Control.Monad.Trans.Except
+#endif
 import           Data.Aeson
 import           Data.Monoid
 import           Data.Proxy
@@ -39,7 +41,11 @@ spec = describe "servant-ekg" $ do
   it "collects number of request" $ do
     withApp $ \port mvar -> do
       mgr <- newManager defaultManagerSettings
+#if MIN_VERSION_servant(0,9,0)
+      Right _result <- runClientM (getEp "name" Nothing) (ClientEnv mgr (BaseUrl Http "localhost" port ""))
+#else
       _result <- runExceptT $ getEp "name" Nothing mgr (BaseUrl Http "localhost" port "")
+#endif
       m <- readMVar mvar
       case H.lookup "hello.:name.GET" m of
         Nothing -> fail "Expected some value"
@@ -69,7 +75,11 @@ type TestApi =
   :<|> "greet" :> ReqBody '[JSON] Greet :> Post '[JSON] Greet
 
        -- DELETE /greet/:greetid
+#if MIN_VERSION_servant(0,8,0)
+  :<|> "greet" :> Capture "greetid" Text :> Delete '[JSON] NoContent
+#else
   :<|> "greet" :> Capture "greetid" Text :> Delete '[JSON] ()
+#endif
 
 testApi :: Proxy TestApi
 testApi = Proxy
@@ -89,7 +99,11 @@ server = helloH :<|> postGreetH :<|> deleteGreetH
 
         postGreetH = return
 
+#if MIN_VERSION_servant(0,8,0)
+        deleteGreetH _ = return NoContent
+#else
         deleteGreetH _ = return ()
+#endif
 
 -- Turn the server into a WAI app. 'serve' is provided by servant,
 -- more precisely by the Servant.Server module.

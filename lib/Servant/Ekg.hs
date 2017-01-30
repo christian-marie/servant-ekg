@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP                 #-}
 {-# LANGUAGE DataKinds           #-}
 {-# LANGUAGE FlexibleContexts    #-}
 {-# LANGUAGE FlexibleInstances   #-}
@@ -160,3 +161,8 @@ instance ReflectMethod method => HasEndpoint (Verb method status cts a) where
 
 instance HasEndpoint (Raw) where
     getEndpoint _ _ = Just ([],"RAW")
+
+#if MIN_VERSION_servant(0,8,1)
+instance HasEndpoint (sub :: *) => HasEndpoint (CaptureAll (h :: Symbol) a :> sub) where
+    getEndpoint _ = getEndpoint (Proxy :: Proxy sub)
+#endif
