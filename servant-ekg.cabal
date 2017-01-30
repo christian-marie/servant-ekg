@@ -4,7 +4,7 @@ synopsis:            Helpers for using ekg with servant
 description:         Helpers for using ekg with servant
 license:             BSD3
 license-file:        LICENSE
-author:              Anchor Engineering <engineering@lists.anchor.net.au>
+author:              Anchor Engineering <engineering@lists.anchor.net.au>, Servant Contributors
 maintainer:          Servant Contributors <haskell-servant-maintainers@googlegroups.com>
 category:            System
 build-type:          Simple
