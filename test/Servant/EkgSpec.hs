@@ -10,7 +10,9 @@
 module Servant.EkgSpec (spec) where
 
 import           Control.Concurrent
+#if !MIN_VERSION_servant(0,9,0)
 import           Control.Monad.Trans.Except
+#endif
 import           Data.Aeson
 import           Data.Monoid
 import           Data.Proxy
@@ -40,7 +42,11 @@ spec = describe "servant-ekg" $ do
   it "collects number of request" $ do
     withApp $ \port mvar -> do
       mgr <- newManager defaultManagerSettings
+#if MIN_VERSION_servant(0,9,0)
+      Right _result <- runClientM (getEp "name" Nothing) (ClientEnv mgr (BaseUrl Http "localhost" port ""))
+#else
       _result <- runExceptT $ getEp "name" Nothing mgr (BaseUrl Http "localhost" port "")
+#endif
       m <- readMVar mvar
       case H.lookup "hello.:name.GET" m of
         Nothing -> fail "Expected some value"
