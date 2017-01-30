@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP                  #-}
 {-# LANGUAGE DataKinds            #-}
 {-# LANGUAGE DeriveGeneric        #-}
 {-# LANGUAGE OverlappingInstances #-}
@@ -69,7 +70,11 @@ type TestApi =
   :<|> "greet" :> ReqBody '[JSON] Greet :> Post '[JSON] Greet
 
        -- DELETE /greet/:greetid
+#if MIN_VERSION_servant(0,8,0)
+  :<|> "greet" :> Capture "greetid" Text :> Delete '[JSON] NoContent
+#else
   :<|> "greet" :> Capture "greetid" Text :> Delete '[JSON] ()
+#endif
 
 testApi :: Proxy TestApi
 testApi = Proxy
@@ -89,7 +94,11 @@ server = helloH :<|> postGreetH :<|> deleteGreetH
 
         postGreetH = return
 
+#if MIN_VERSION_servant(0,8,0)
+        deleteGreetH _ = return NoContent
+#else
         deleteGreetH _ = return ()
+#endif
 
 -- Turn the server into a WAI app. 'serve' is provided by servant,
 -- more precisely by the Servant.Server module.
