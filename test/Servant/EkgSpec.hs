@@ -18,7 +18,7 @@ import           Data.Proxy
 import qualified Data.HashMap.Strict as H
 import           Data.Text
 import           GHC.Generics
-import           Network.HTTP.Client (defaultManagerSettings, newManager)
+import           Network.HTTP.Client (defaultManagerSettings, newManager, Manager)
 import           Network.Wai
 import           Network.Wai.Handler.Warp
 import           Servant
@@ -36,18 +36,28 @@ import           Servant.Ekg
 spec :: Spec
 spec = describe "servant-ekg" $ do
 
-  let getEp :<|> _postEp :<|> _deleteEp = client testApi
+  let getEp :<|> postEp :<|> deleteEp = client testApi
 
   it "collects number of request" $ do
     withApp $ \port mvar -> do
       mgr <- newManager defaultManagerSettings
+      let runFn :: (Manager -> BaseUrl -> ExceptT e m a) -> m (Either e a)
 #if MIN_VERSION_servant(0,9,0)
-      Right _result <- runClientM (getEp "name" Nothing) (ClientEnv mgr (BaseUrl Http "localhost" port ""))
+          runFn fn = runClientM $ fn mgr (ClientEnv mgr (BaseUrl Http "localhost" port ""))
 #else
-      _result <- runExceptT $ getEp "name" Nothing mgr (BaseUrl Http "localhost" port "")
+          runFn fn = runExceptT $ fn mgr (BaseUrl Http "localhost" port "")
 #endif
+      _ <- runFn $ getEp "name" Nothing
+      _ <- runFn $ postEp (Greet "hi")
+      _ <- runFn $ deleteEp "blah"
       m <- readMVar mvar
       case H.lookup "hello.:name.GET" m of
+        Nothing -> fail "Expected some value"
+        Just v  -> Counter.read (metersC2XX v) `shouldReturn` 1
+      case H.lookup "greet.POST" m of
+        Nothing -> fail "Expected some value"
+        Just v  -> Counter.read (metersC2XX v) `shouldReturn` 1
+      case H.lookup "greet.:greetid.DELETE" m of
         Nothing -> fail "Expected some value"
         Just v  -> Counter.read (metersC2XX v) `shouldReturn` 1
 

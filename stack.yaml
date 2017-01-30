@@ -10,7 +10,7 @@
 # resolver:
 #  name: custom-snapshot
 #  location: "./custom-snapshot.yaml"
-resolver: lts-5.16
+resolver: lts-7.18
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -35,11 +35,6 @@ packages:
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)
 extra-deps:
-- servant-0.7.1
-- servant-server-0.7.1
-- servant-client-0.7.1
-- warp-3.2.6
-- http2-1.6.0
 
 # Override default flag values for local packages and extra-deps
 flags: {}
