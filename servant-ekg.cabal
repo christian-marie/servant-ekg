@@ -12,7 +12,7 @@ cabal-version:       >=1.10
 
 source-repository HEAD
   type: git
-  location: https://github.com/servant/servant-ekg.git
+  location: https://github.com/haskell-servant/servant-ekg.git
 
 library
   exposed-modules:     Servant.Ekg
