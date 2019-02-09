@@ -1,66 +1,77 @@
-name:                servant-ekg
-version:             0.2.0.0
-synopsis:            Helpers for using ekg with servant
-description:         Helpers for using ekg with servant
-license:             BSD3
-license-file:        LICENSE
-author:              Anchor Engineering <engineering@lists.anchor.net.au>, Servant Contributors
-maintainer:          Servant Contributors <haskell-servant-maintainers@googlegroups.com>
-category:            System
-build-type:          Simple
-cabal-version:       >=1.10
+cabal-version: >=1.10
+name:          servant-ekg
+version:       0.2.1.0
+synopsis:      Helpers for using ekg with servant
+description:   Helpers for using ekg with servant, e.g.. counters per endpoint.
+license:       BSD3
+license-file:  LICENSE
+author:
+  Anchor Engineering <engineering@lists.anchor.net.au>, Servant Contributors
+
+maintainer:
+  Servant Contributors <haskell-servant-maintainers@googlegroups.com>
+
+category:      System
+build-type:    Simple
+tested-with: ghc ==8.0.2 || ==8.2.2 || ==8.4.4 || ==8.6.3
 
 source-repository HEAD
-  type: git
+  type:     git
   location: https://github.com/haskell-servant/servant-ekg.git
 
 library
-  exposed-modules:     Servant.Ekg
-  hs-source-dirs:      lib
-  build-depends:       base >=4.7 && < 4.10
-                     , ekg-core
-                     , servant > 0.5 && < 0.10
-                     , http-types
-                     , text
-                     , time
-                     , unordered-containers
-                     , wai
-  default-language:    Haskell2010
+  exposed-modules:  Servant.Ekg
+  hs-source-dirs:   lib
+  build-depends:
+      base                  >=4.9      && <4.13
+    , ekg-core              >=0.1.1.6  && <0.2
+    , http-types            >=0.12.2   && <0.13
+    , servant               >=0.15     && <0.16
+    , text                  >=1.2.3.0  && <1.3
+    , time                  >=1.6.0.1  && <1.9
+    , unordered-containers  >=0.2.9.0  && <0.3
+    , wai                   >=3.2.2    && <3.3
+
+  default-language: Haskell2010
 
 test-suite spec
-  type: exitcode-stdio-1.0
-  ghc-options: -Wall
+  type:             exitcode-stdio-1.0
+  ghc-options:      -Wall
   default-language: Haskell2010
-  hs-source-dirs: test
-  main-is: Spec.hs
-  build-depends:      base == 4.*
-                    , aeson
-                    , ekg
-                    , ekg-core
-                    , servant-ekg
-                    , servant-server
-                    , servant-client
-                    , servant
-                    , http-client
-                    , text
-                    , wai
-                    , warp >= 3.2.4 && < 3.3
-                    , hspec == 2.*
-                    , unordered-containers
-                    , transformers
+  hs-source-dirs:   test
+  main-is:          Spec.hs
+  other-modules:    Servant.EkgSpec
+  build-tool-depends: hspec-discover:hspec-discover
+  build-depends:
+      aeson
+    , base
+    , ekg
+    , ekg-core
+    , hspec                 >=2     && <3
+    , http-client
+    , servant
+    , servant-client
+    , servant-ekg
+    , servant-server
+    , text
+    , transformers
+    , unordered-containers
+    , wai
+    , warp                  >=3.2.4 && <3.3
 
 executable bench
-  hs-source-dirs: bench
-  main-is: Main.hs
-  ghc-options: -Wall -threaded -O2
+  hs-source-dirs:   bench
+  main-is:          Main.hs
+  ghc-options:      -Wall -threaded
   default-language: Haskell2010
-  build-depends:      base == 4.*
-                    , aeson
-                    , ekg
-                    , ekg-core
-                    , servant-ekg
-                    , servant-server
-                    , text
-                    , wai
-                    , warp >= 3.2.4 && < 3.3
-                    , process
+  build-depends:
+      aeson
+    , base            >=4     && <5
+    , ekg
+    , ekg-core
+    , process
+    , servant-ekg
+    , servant-server
+    , text
+    , wai
+    , warp            >=3.2.4 && <3.3

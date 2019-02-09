@@ -99,6 +99,9 @@ monitorEndpoints proxy store meters application request respond = do
 class HasEndpoint a where
     getEndpoint :: Proxy a -> Request -> Maybe ([Text], Method)
 
+instance HasEndpoint EmptyAPI where
+    getEndpoint _ _ = Nothing
+
 instance (HasEndpoint (a :: *), HasEndpoint (b :: *)) => HasEndpoint (a :<|> b) where
     getEndpoint _ req =
         getEndpoint (Proxy :: Proxy a) req `mplus`
@@ -114,7 +117,7 @@ instance (KnownSymbol (path :: Symbol), HasEndpoint (sub :: *))
             _ -> Nothing
 
 instance (KnownSymbol (capture :: Symbol), HasEndpoint (sub :: *))
-    => HasEndpoint (Capture capture a :> sub) where
+    => HasEndpoint (Capture' mods capture a :> sub) where
     getEndpoint _ req =
         case pathInfo req of
             _:ps -> do
@@ -123,10 +126,16 @@ instance (KnownSymbol (capture :: Symbol), HasEndpoint (sub :: *))
                 return (p:end, method)
             _ -> Nothing
 
-instance HasEndpoint (sub :: *) => HasEndpoint (Header h a :> sub) where
+instance HasEndpoint (sub :: *) => HasEndpoint (Summary d :> sub) where
     getEndpoint _ = getEndpoint (Proxy :: Proxy sub)
 
-instance HasEndpoint (sub :: *) => HasEndpoint (QueryParam (h :: Symbol) a :> sub) where
+instance HasEndpoint (sub :: *) => HasEndpoint (Description d :> sub) where
+    getEndpoint _ = getEndpoint (Proxy :: Proxy sub)
+
+instance HasEndpoint (sub :: *) => HasEndpoint (Header' mods h a :> sub) where
+    getEndpoint _ = getEndpoint (Proxy :: Proxy sub)
+
+instance HasEndpoint (sub :: *) => HasEndpoint (QueryParam' mods (h :: Symbol) a :> sub) where
     getEndpoint _ = getEndpoint (Proxy :: Proxy sub)
 
 instance HasEndpoint (sub :: *) => HasEndpoint (QueryParams (h :: Symbol) a :> sub) where
@@ -135,7 +144,10 @@ instance HasEndpoint (sub :: *) => HasEndpoint (QueryParams (h :: Symbol) a :> s
 instance HasEndpoint (sub :: *) => HasEndpoint (QueryFlag h :> sub) where
     getEndpoint _ = getEndpoint (Proxy :: Proxy sub)
 
-instance HasEndpoint (sub :: *) => HasEndpoint (ReqBody cts a :> sub) where
+instance HasEndpoint (sub :: *) => HasEndpoint (ReqBody' mods cts a :> sub) where
+    getEndpoint _ = getEndpoint (Proxy :: Proxy sub)
+
+instance HasEndpoint (sub :: *) => HasEndpoint (StreamBody' mods framing ct a :> sub) where
     getEndpoint _ = getEndpoint (Proxy :: Proxy sub)
 
 instance HasEndpoint (sub :: *) => HasEndpoint (RemoteHost :> sub) where
@@ -154,6 +166,12 @@ instance HasEndpoint (sub :: *) => HasEndpoint (WithNamedContext x y sub) where
     getEndpoint _ = getEndpoint (Proxy :: Proxy sub)
 
 instance ReflectMethod method => HasEndpoint (Verb method status cts a) where
+    getEndpoint _ req = case pathInfo req of
+        [] | requestMethod req == method -> Just ([], method)
+        _ -> Nothing
+      where method = reflectMethod (Proxy :: Proxy method)
+
+instance ReflectMethod method => HasEndpoint (Stream method status framing ct a) where
     getEndpoint _ req = case pathInfo req of
         [] | requestMethod req == method -> Just ([], method)
         _ -> Nothing
