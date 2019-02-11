@@ -9,21 +9,18 @@
 module Servant.EkgSpec (spec) where
 
 import           Control.Concurrent
-#if !MIN_VERSION_servant(0,9,0)
-import           Control.Monad.Trans.Except
-#endif
 import           Data.Aeson
 import           Data.Monoid
 import           Data.Proxy
 import qualified Data.HashMap.Strict as H
 import           Data.Text
 import           GHC.Generics
-import           Network.HTTP.Client (defaultManagerSettings, newManager, Manager)
+import           Network.HTTP.Client (defaultManagerSettings, newManager)
 import           Network.Wai
 import           Network.Wai.Handler.Warp
 import           Servant
 import           Servant.Client
-import           Servant.API.Internal.Test.ComprehensiveAPI (comprehensiveAPI)
+import           Servant.Test.ComprehensiveAPI (comprehensiveAPI)
 import           System.Metrics
 import qualified System.Metrics.Counter as Counter
 import           Test.Hspec
@@ -41,12 +38,8 @@ spec = describe "servant-ekg" $ do
   it "collects number of request" $ do
     withApp $ \port mvar -> do
       mgr <- newManager defaultManagerSettings
-      let runFn :: (Manager -> BaseUrl -> ExceptT e m a) -> m (Either e a)
-#if MIN_VERSION_servant(0,9,0)
-          runFn fn = runClientM $ fn mgr (ClientEnv mgr (BaseUrl Http "localhost" port ""))
-#else
-          runFn fn = runExceptT $ fn mgr (BaseUrl Http "localhost" port "")
-#endif
+      let runFn :: ClientM a -> IO (Either ServantError a)
+          runFn fn = runClientM fn (mkClientEnv mgr (BaseUrl Http "localhost" port ""))
       _ <- runFn $ getEp "name" Nothing
       _ <- runFn $ postEp (Greet "hi")
       _ <- runFn $ deleteEp "blah"
@@ -85,11 +78,7 @@ type TestApi =
   :<|> "greet" :> ReqBody '[JSON] Greet :> Post '[JSON] Greet
 
        -- DELETE /greet/:greetid
-#if MIN_VERSION_servant(0,8,0)
   :<|> "greet" :> Capture "greetid" Text :> Delete '[JSON] NoContent
-#else
-  :<|> "greet" :> Capture "greetid" Text :> Delete '[JSON] ()
-#endif
 
 testApi :: Proxy TestApi
 testApi = Proxy

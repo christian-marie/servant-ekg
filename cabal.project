@@ -1,0 +1,3 @@
+packages: .
+reorder-goals: True
+max-backjumps: 100
