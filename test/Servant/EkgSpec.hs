@@ -27,6 +27,9 @@ import           Test.Hspec
 
 import           Servant.Ekg
 
+#if !MIN_VERSION_servant_client(0,16,0)
+#define ClientError ServantError
+#endif
 
 -- * Spec
 
@@ -38,7 +41,7 @@ spec = describe "servant-ekg" $ do
   it "collects number of request" $ do
     withApp $ \port mvar -> do
       mgr <- newManager defaultManagerSettings
-      let runFn :: ClientM a -> IO (Either ServantError a)
+      let runFn :: ClientM a -> IO (Either ClientError a)
           runFn fn = runClientM fn (mkClientEnv mgr (BaseUrl Http "localhost" port ""))
       _ <- runFn $ getEp "name" Nothing
       _ <- runFn $ postEp (Greet "hi")
