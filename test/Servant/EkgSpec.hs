@@ -1,32 +1,41 @@
-{-# LANGUAGE CPP                  #-}
-{-# LANGUAGE DataKinds            #-}
-{-# LANGUAGE DeriveGeneric        #-}
-{-# LANGUAGE OverloadedStrings    #-}
-{-# LANGUAGE PolyKinds            #-}
-{-# LANGUAGE TypeFamilies         #-}
-{-# LANGUAGE TypeOperators        #-}
+{-# LANGUAGE CPP               #-}
+{-# LANGUAGE DataKinds         #-}
+{-# LANGUAGE DeriveGeneric     #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE PolyKinds         #-}
+{-# LANGUAGE RankNTypes        #-}
+{-# LANGUAGE TypeFamilies      #-}
+{-# LANGUAGE TypeOperators     #-}
 
 module Servant.EkgSpec (spec) where
 
 import           Control.Concurrent
 import           Data.Aeson
-import           Data.Monoid
+import qualified Data.HashMap.Strict                        as H
+import           Data.Monoid                                ((<>))
 import           Data.Proxy
-import qualified Data.HashMap.Strict as H
 import           Data.Text
 import           GHC.Generics
-import           Network.HTTP.Client (defaultManagerSettings, newManager)
+import           Network.HTTP.Client                        (defaultManagerSettings,
+                                                             newManager)
 import           Network.Wai
 import           Network.Wai.Handler.Warp
 import           Servant
 import           Servant.Client
-import           Servant.Test.ComprehensiveAPI (comprehensiveAPI)
+#if MIN_VERSION_servant(0,15,0)
+import           Servant.Test.ComprehensiveAPI              (comprehensiveAPI)
+#else
+import           Servant.API.Internal.Test.ComprehensiveAPI (comprehensiveAPI)
+#endif
 import           System.Metrics
-import qualified System.Metrics.Counter as Counter
+import qualified System.Metrics.Counter                     as Counter
 import           Test.Hspec
 
 import           Servant.Ekg
 
+#if !MIN_VERSION_servant_client(0,16,0)
+#define ClientError ServantError
+#endif
 
 -- * Spec
 
@@ -35,10 +44,10 @@ spec = describe "servant-ekg" $ do
 
   let getEp :<|> postEp :<|> deleteEp = client testApi
 
-  it "collects number of request" $ do
+  it "collects number of request" $
     withApp $ \port mvar -> do
       mgr <- newManager defaultManagerSettings
-      let runFn :: ClientM a -> IO (Either ServantError a)
+      let runFn :: ClientM a -> IO (Either ClientError a)
           runFn fn = runClientM fn (mkClientEnv mgr (BaseUrl Http "localhost" port ""))
       _ <- runFn $ getEp "name" Nothing
       _ <- runFn $ postEp (Greet "hi")
@@ -98,11 +107,7 @@ server = helloH :<|> postGreetH :<|> deleteGreetH
 
         postGreetH = return
 
-#if MIN_VERSION_servant(0,8,0)
         deleteGreetH _ = return NoContent
-#else
-        deleteGreetH _ = return ()
-#endif
 
 -- Turn the server into a WAI app. 'serve' is provided by servant,
 -- more precisely by the Servant.Server module.
