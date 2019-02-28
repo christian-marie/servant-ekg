@@ -62,7 +62,8 @@ test-suite spec
     , wai
     , warp                  >=3.2.4 && <3.3
 
-executable bench
+benchmark bench
+  type:             exitcode-stdio-1.0
   hs-source-dirs:   bench
   main-is:          Main.hs
   ghc-options:      -Wall -threaded
