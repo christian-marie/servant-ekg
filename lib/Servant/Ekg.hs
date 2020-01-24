@@ -168,6 +168,17 @@ instance ReflectMethod method => HasEndpoint (Verb method status cts a) where
     enumerateEndpoints _ = [APIEndpoint mempty method]
       where method = reflectMethod (Proxy :: Proxy method)
 
+#if MIN_VERSION_servant(0,17,0)
+instance ReflectMethod method => HasEndpoint (NoContentVerb method) where
+    getEndpoint _ req = case pathInfo req of
+        [] | requestMethod req == method -> Just (APIEndpoint [] method)
+        _                                -> Nothing
+      where method = reflectMethod (Proxy :: Proxy method)
+
+    enumerateEndpoints _ = [APIEndpoint mempty method]
+      where method = reflectMethod (Proxy :: Proxy method)
+#endif
+
 instance ReflectMethod method => HasEndpoint (Stream method status framing ct a) where
     getEndpoint _ req = case pathInfo req of
         [] | requestMethod req == method -> Just (APIEndpoint [] method)
