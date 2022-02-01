@@ -13,7 +13,7 @@ maintainer:
 
 category:      Servant, Web, System
 build-type:    Simple
-tested-with:   GHC ==8.0.2 || ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.4 || ==8.10.2
+tested-with:   GHC ==8.6.5 || ==8.8.4 || ==8.10.7
 extra-source-files: README.md CHANGELOG.md
 
 source-repository HEAD
