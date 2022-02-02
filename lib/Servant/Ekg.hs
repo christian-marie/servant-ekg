@@ -117,6 +117,10 @@ instance HasEndpoint (sub :: *) => HasEndpoint (Header' mods h a :> sub) where
     getEndpoint        _ = getEndpoint        (Proxy :: Proxy sub)
     enumerateEndpoints _ = enumerateEndpoints (Proxy :: Proxy sub)
 
+instance HasEndpoint (sub :: *) => HasEndpoint (Fragment a :> sub) where
+    getEndpoint        _ = getEndpoint        (Proxy :: Proxy sub)
+    enumerateEndpoints _ = enumerateEndpoints (Proxy :: Proxy sub)
+
 instance HasEndpoint (sub :: *) => HasEndpoint (QueryParam' mods (h :: Symbol) a :> sub) where
     getEndpoint        _ = getEndpoint        (Proxy :: Proxy sub)
     enumerateEndpoints _ = enumerateEndpoints (Proxy :: Proxy sub)

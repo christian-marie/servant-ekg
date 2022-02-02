@@ -1,6 +1,7 @@
 # servant-ekg
 
 [![Build Status](https://travis-ci.org/haskell-servant/servant-ekg.png)](https://travis-ci.org/haskell-servant/servant-ekg)
+[![Build status](https://github.com/haskell-servant/servant-ekg/actions/workflows/ci.yml/badge.svg)](https://github.com/haskell-servant/servant-ekg/actions/workflows/ci.yml)
 
 # Servant Performance Counters
 
